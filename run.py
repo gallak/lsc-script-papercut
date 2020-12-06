@@ -10,7 +10,7 @@ from lib import papercut
 
 
 # import de la configuration
-confParser = configparser.Config()
+confParser = configparser.ConfigParser()
 confParser.read("papercut.cfg")
 
 # creation du logger
@@ -18,22 +18,21 @@ logger = logging.getLogger("pcLog")
 # format de log
 formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 # niveau de log
-logger.setLevel(logging.parser["log"].get("loglevel"))
+#pprint.pprint(confParser["log"].get("loglevel"))
+logger.setLevel(logging.DEBUG)
 # handler
-fh = logging.FileHandler(logging.parser["log"].get("logfile")
-fh.setLevel(logging.parser["log"].get("loglevel"))
+fh = logging.FileHandler(confParser["log"].get("logfile"))
+#fh.setLevel(logging.confParser["log"].get("loglevel"))
+fh.setLevel(logging.DEBUG)
 fh.setFormatter(formatter)
 logger.addHandler(fh)
 
 # option from commandline
 
-cliParser=argparse.ArgumentParser( prog = 'run', description =""" Script used to sync PAPERCUT """)
+cliParser=ArgumentParser( prog = 'run', description =""" Script used to sync PAPERCUT """)
 
-cliParser.add_argument("--getListUsers", help="List all account from PAPERCUT server")
-cliParser.add_argument("--getOneUser", help="Fetch one user's attributes from PAPERCUT server", type =str)
-cliParser.add_argument("--updateOneUser", help="Update one user's attributes from PAPERCUT server with LDIF from stdin", type =str)
-cliParser.add_argument("--delOneUser", help="delete one user from PAPERCUT server", type =str)
-cliParser.add_argument("--dumpAllUsers", help="dump all attributs from all user from PAPERCUT server")
+cliParser.add_argument("--action", help="one of the following action : getAllUser / getOneUser (need username) / updateOneUser (need username and ldif from stdin) / delOneUser (need username) / dumpAllUser")
+cliParser.add_argument("--user", help="username to use for get/updateOne/delete user from PAPERCUT server", type =str)
 
 
 PcAttributs=['username','username-alias','full-name','email','primary-card-number','secondary-card-number','office','card-pin','department']
@@ -48,17 +47,14 @@ if __name__ == '__main__':
   pcCnx.connect()
 
   arguments = cliParser.parse_args()
-  if arguments.getListUsers:
-    pprint.pprint(pcCnx.list_users())
-
-  if arguments.getOneUSer:
-    pcCnx.getPapercutLscExec(arguments.getOneUSer,PcAttributs)
-
-  if arguments.updateOneUser:
-    pcCnx.updatePapercutLscExec(arguments.updateOneUser,sys.stdin)
-
-  if arguments.delOneUser:
-    pcCnx.removePapercutLscExec(arguments.delOneUser)
-
-  if arguments.dumpAllUsers:
-    pcCnx.show_all_user_details(PcAttributs)
+  if arguments.action:
+    if arguments.action == "getAllUser" :
+      pprint.pprint(pcCnx.list_users())
+    elif arguments.action == "getOneUser" :
+      pcCnx.getPapercutLscExec(arguments.user,PcAttributs)
+    elif arguments.action == "updateOneUser" :
+      pcCnx.updatePapercutLscExec(arguments.user,sys.stdin)
+    elif rguments.action == "delOneUser" :
+      pcCnx.removePapercutLscExec(arguments.user)
+    elif rguments.action == "dumpAllUser" :
+      pcCnx.show_all_user_details(PcAttributs)
