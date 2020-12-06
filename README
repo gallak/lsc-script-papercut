@@ -1,0 +1,17 @@
+
+# More details of XMLRPC Perpercut API
+https://gist.github.com/damienatpapercut/67dee5d06ed47b3283ca
+Attributes availbale
+balance', 'card-number', 'card-pin', 'department',
+  'disabled-net', 'disabled-print', 'email', 'full-name', 'notes',
+  'office', 'print-stats.job-count', 'print-stats.page-count',
+  'net-stats.data-mb','net-stats.time-hours','restricted']
+
+
+# how to active XML-RPC interface
+https://www.papercut.com/support/resources/manuals/ng-mf/common/topics/tools-web-services.html
+
+# install
+apt-get install python3 virtualenv python3-virtualenv python3-ldap
+virtualenv -p python3 env
+
