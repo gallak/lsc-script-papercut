@@ -6,6 +6,9 @@ from pprint import pprint
 from xmlrpc.client import ServerProxy, Fault, ProtocolError
 from ssl import create_default_context, Purpose
 import ldif
+#from ldap import modlist
+
+#https://living-sun.com/fr/python/706390-python-ldap-lib-import-ldif-python-openldap-python-ldap.html
 
 # This fonction translate RFID Tag read fromla a classic reader and store in supannCMSCard fielad
 def fixCMSCarID(field,value):
@@ -178,7 +181,11 @@ class PaperCut:
     modifTab=[]
     tab=[]
     inputData = ldif.LDIFRecordList(inputStream)
-    inputData.parse()
+    inputData.parse_entry_records()
+
+#    pprint(strinputStream)
+    pprint(inputData.all_records)
+
     for ldapField, paperCutField in self.mapping.items():
         tab=[]
         try :
@@ -246,3 +253,11 @@ class TAG:
         completeTag=self.mappingHpPrefix['DesfireV2'] + self.tag[2:]
       print("  == CARTE : " + completeTag)
     return(completeTag.upper())
+
+
+
+#class MyLDIF(LDIFParser):
+#   def __init__(self,input):
+#      LDIFParser.__init__(self,input)
+#   def handle(self):
+#      self.writer.unparse()
