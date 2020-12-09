@@ -4,6 +4,7 @@
 import pprint
 import configparser
 import logging
+import sys
 from argparse import ArgumentParser
 from lib import papercut
 
@@ -18,7 +19,7 @@ logger = logging.getLogger("pcLog")
 # format de log
 formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 # niveau de log
-#pprint.pprint(confParser["log"].get("loglevel"))
+#loglevel=confParser["log"].get("loglevel")
 logger.setLevel(logging.DEBUG)
 # handler
 fh = logging.FileHandler(confParser["log"].get("logfile"))
@@ -31,7 +32,7 @@ logger.addHandler(fh)
 
 cliParser=ArgumentParser( prog = 'run', description =""" Script used to sync PAPERCUT """)
 
-cliParser.add_argument("--action", help="one of the following action : getAllUser / getOneUser (need username) / updateOneUser (need username and ldif from stdin) / delOneUser (need username) / dumpAllUser")
+cliParser.add_argument("--action", help="one of the following action : getAllUser / getOneUser (need username) / createOneUser (need username and ldif) / updateOneUser (need username and ldif from stdin) / delOneUser (need username) / dumpAllUser")
 cliParser.add_argument("--user", help="username to use for get/updateOne/delete user from PAPERCUT server", type =str)
 
 
@@ -54,7 +55,11 @@ if __name__ == '__main__':
       pcCnx.getPapercutLscExec(arguments.user,PcAttributs)
     elif arguments.action == "updateOneUser" :
       pcCnx.updatePapercutLscExec(arguments.user,sys.stdin)
-    elif rguments.action == "delOneUser" :
+    elif arguments.action == "delOneUser" :
       pcCnx.removePapercutLscExec(arguments.user)
-    elif rguments.action == "dumpAllUser" :
+    elif arguments.action == "dumpAllUser" :
       pcCnx.show_all_user_details(PcAttributs)
+    elif arguments.action == "createOneUser" :
+     pcCnx.addPapercutLscExec(arguments.user,sys.stdin)
+    else :
+     print("no valid choice entered")
