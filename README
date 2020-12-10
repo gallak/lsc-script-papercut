@@ -7,6 +7,9 @@ balance', 'card-number', 'card-pin', 'department',
   'office', 'print-stats.job-count', 'print-stats.page-count',
   'net-stats.data-mb','net-stats.time-hours','restricted']
 
+# how to add username aliasing
+https://www.papercut.com/support/resources/manuals/ng-mf/applicationserver/topics/user-username-aliasing.html
+
 
 # how to active XML-RPC interface
 https://www.papercut.com/support/resources/manuals/ng-mf/common/topics/tools-web-services.html
@@ -14,4 +17,40 @@ https://www.papercut.com/support/resources/manuals/ng-mf/common/topics/tools-web
 # install
 apt-get install python3 virtualenv python3-virtualenv python3-ldap
 virtualenv -p python3 env
+
+
+# example
+(env) root@ltb-dev:/srv/lsc-script-papercut# ./run.py --action getAllUser
+(env) root@ltb-dev:/srv/lsc-script-papercut# cat test-add.ldif | ./run.py --action createOneUser --user john.doe
+(env) root@ltb-dev:/srv/lsc-script-papercut# cat test-add.ldif | ./run.py --action updateOneUser --user john.doe
+(env) root@ltb-dev:/srv/lsc-script-papercut# ./run.py --action getOneUser --user first-user
+dn: john.doe
+username-alias: jdoe
+full-name: Ze Big Boss
+email: user@financial
+primary-card-number: 007234
+secondary-card-number: r007f01383453453453453
+office: Building 1
+department: Financial service
+notes: VIP ( got all money)
+(env) root@ltb-dev:/srv/lsc-script-papercut# ./run.py --action getAllUser
+john.doe
+(env) root@ltb-dev:/srv/lsc-script-papercut# ./run.py --action delOneUser --user john.doe
+(env) root@ltb-dev:/srv/lsc-script-papercut# ./run.py --action getAllUser
+(env) root@ltb-dev:/srv/lsc-script-papercut# 
+
+
+# ldif file
+
+dn: uid=john.doe,ou=people,dc=company,dc=com
+changetype: add
+mail: user@financial
+employeeNumber: 007234
+supannCMSCard: r007f01383453453453453
+supannAliasLogin: jdoe
+cn: Ze Big Boss
+roomNumber: Building 1
+description: VIP ( got all money)
+ou: Financial service
+
 
