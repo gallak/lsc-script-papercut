@@ -51,7 +51,6 @@ class PaperCut:
 
     while True:
         try:
-
             user_list = self.proxy.api.listUserAccounts(self.token, offset,limit)
         except Fault as error:
             print("\ncalled listUserAccounts(). Return fault is {}".format(error.faultString))
@@ -60,11 +59,16 @@ class PaperCut:
             print("\nA protocol error occurred\nURL: {}\nHTTP/HTTPS headers: {}\nError code: {}\nError message: {}".format(
                 error.url, error.headers, error.errcode, error.errmsg))
             exit(1)
-        if limit == 0 or len(user_list) < limit:
-            break # We have reached the end
+#        if limit == 0 or len(user_list) < limit:
+#            print(" boucle et limitre de merde !!!!   ya perosne")
+#            break # We have reached the end
 
         offset += limit # We need to next slice of users
         return_list += user_list
+        if limit == 0 or len(user_list) < limit:
+            #print(" boucle et limitre de merde !!!!   ya perosne")
+            break # We have reached the end
+
     return return_list
 
   def get_user_details(self,user,attributs):
@@ -134,12 +138,14 @@ class PaperCut:
 ##  attribute3: def
 # ARG : nothing
   def getPapercutLscExec(self,username,attributs):
-    self.get_user_details(username,attributs)
-    print("dn: " + username)
-    for index, value in enumerate(self.get_user_details(username,attributs)):
-        if value :
-            print(attributs[index]+": "+value)
-
+    try: 
+      self.get_user_details(username,attributs)
+      print("dn: " + username)
+      for index, value in enumerate(self.get_user_details(username,attributs)):
+          if value :
+              print(attributs[index]+": "+value)
+    except Exception as x:
+      pprint(x)
 
 # IN  :
 ##  dn: DN
@@ -163,8 +169,11 @@ class PaperCut:
         tab.append(paperCutField)
         tab.append(fixCMSCarID(ldapField,valueLdapField))
         modifTab.append(tab)
-    self.proxy.api.addNewUser(self.token, username )
-    self.proxy.api.setUserProperties(self.token, username, modifTab)
+    try:
+      self.proxy.api.addNewUser(self.token, username )
+      self.proxy.api.setUserProperties(self.token, username, modifTab)
+    except Exception as x :
+      pprint(x)
     pprint(modifTab)
 
 # IN  : dn: DN
@@ -195,7 +204,10 @@ class PaperCut:
         tab.append(paperCutField)
         tab.append(fixCMSCarID(ldapField,valueLdapField))
         modifTab.append(tab)
-    self.proxy.api.setUserProperties(self.token, username, modifTab)
+    try: 
+      self.proxy.api.setUserProperties(self.token, username, modifTab)
+    except Exception as x:
+      pprint(x)
 
 
 # IN  :
@@ -204,7 +216,10 @@ class PaperCut:
 # OUT : nothing
 # ARG : script is called with the destination main identifier as argument.
   def removePapercutLscExec(self, username):
-    self.proxy.api.deleteExistingUser(self.token, username)
+    try:
+      self.proxy.api.deleteExistingUser(self.token, username)
+    except Exception as x:
+      pprint(x)
 # IN  :
 ##  dn: DN
 ##  changetype: modrdn
@@ -254,10 +269,3 @@ class TAG:
       print("  == CARTE : " + completeTag)
     return(completeTag.upper())
 
-
-
-#class MyLDIF(LDIFParser):
-#   def __init__(self,input):
-#      LDIFParser.__init__(self,input)
-#   def handle(self):
-#      self.writer.unparse()
