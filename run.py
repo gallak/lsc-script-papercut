@@ -13,7 +13,7 @@ from lib import papercut
 # import de la configuration
 confParser = configparser.ConfigParser()
 confParser.optionxform = lambda option: option
-confParser.read("papercut.cfg")
+confParser.read("/srv/lsc-script-papercut/papercut.cfg")
 
 # creation du logger
 logger = logging.getLogger("pcLog")
@@ -43,15 +43,16 @@ if __name__ == '__main__':
   pcCnx=papercut.PaperCut()
   pcCnx.url=confParser["server"].get("url")
   pcCnx.token=confParser["server"].get("token")
-  pcCnx.mapping=confParser["mapping"]
+  pcCnx.mapping=confParser["lsc-mapping"]
+  pcCnx.pivot=confParser["lsc-pivot"]
 
   pcCnx.connect()
 
   arguments = cliParser.parse_args()
   if arguments.action:
+    logger.debug(" Action %s called", arguments.action)
     if arguments.action == "getAllUser" :
-      for account in pcCnx.list_users():
-        print(account)
+      pcCnx.listPapercutLscExec()
     elif arguments.action == "getOneUser" :
       pcCnx.getPapercutLscExec(arguments.user,PcAttributs)
     elif arguments.action == "updateOneUser" :
@@ -63,4 +64,5 @@ if __name__ == '__main__':
     elif arguments.action == "createOneUser" :
      pcCnx.addPapercutLscExec(arguments.user,sys.stdin)
     else :
-     print("no valid choice entered")
+     logger.debug("%s is not a valid action see --help options")
+     exit(255)
