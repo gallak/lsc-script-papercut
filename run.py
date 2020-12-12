@@ -28,6 +28,8 @@ fh = logging.FileHandler(confParser["log"].get("logfile"))
 fh.setLevel(logging.DEBUG)
 fh.setFormatter(formatter)
 logger.addHandler(fh)
+ch = logging.StreamHandler()
+logger.addHandler(ch)
 
 # option from commandline
 
@@ -44,8 +46,8 @@ if __name__ == '__main__':
   pcCnx.url=confParser["server"].get("url")
   pcCnx.token=confParser["server"].get("token")
   pcCnx.mapping=confParser["lsc-mapping"]
-  pcCnx.pivot=confParser["lsc-pivot"]
-
+  pcCnx.pivot=confParser["lsc-pivot"].get("pivot")
+#  pcCnx.logger = logger
   pcCnx.connect()
 
   arguments = cliParser.parse_args()
@@ -54,7 +56,7 @@ if __name__ == '__main__':
     if arguments.action == "getAllUser" :
       pcCnx.listPapercutLscExec()
     elif arguments.action == "getOneUser" :
-      pcCnx.getPapercutLscExec(arguments.user,PcAttributs)
+      pcCnx.getPapercutLscExec(sys.stdin)
     elif arguments.action == "updateOneUser" :
       pcCnx.updatePapercutLscExec(arguments.user,sys.stdin)
     elif arguments.action == "delOneUser" :

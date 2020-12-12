@@ -6,6 +6,9 @@ from pprint import pprint
 from xmlrpc.client import ServerProxy, Fault, ProtocolError
 from ssl import create_default_context, Purpose
 import ldif
+
+logger = logging.getLogger("pcLog")
+
 #from ldap import modlist
 
 #https://living-sun.com/fr/python/706390-python-ldap-lib-import-ldif-python-openldap-python-ldap.html
@@ -28,16 +31,20 @@ class PaperCut:
   debug           = ''
   proxy           =''
 
-  mapping = {}
+  mapping         = {}
+  pivot           = ''
 
+  logger	  = ''
 
   def __init__(self):
     ''' Constructor for this class. '''
-
+    self.logger = logging.getLogger('pcLog.papercut')
+    self.logger.debug("creation de l'objet")
 
   def connect(self):
     try:
       self.proxy = ServerProxy(self.url + self.path, verbose=False,context = create_default_context(Purpose.CLIENT_AUTH))
+      self.logger.debug("Connexion")
     except all as error:
       pprint.pprint(error)
 
@@ -122,10 +129,9 @@ class PaperCut:
 ##  pivot1: aaa
 # ARG : nothing
   def listPapercutLscExec(self):
-
     for user in self.list_users():
-        print("dn: "+user)
-        print("pivot1 : user")
+        print("dn: " + user)
+        print(self.pivot + ": " + user)
         print("")
 
 # IN  :
@@ -137,15 +143,36 @@ class PaperCut:
 ##  attribute2: abc
 ##  attribute3: def
 # ARG : nothing
-  def getPapercutLscExec(self,username,attributs):
-    try: 
-      self.get_user_details(username,attributs)
+  def getPapercutLscExec(self,inputStream):
+    username = ''
+    try:
+#      fixe get username from inpustream  et  filtre avec l'attribut lsc-pivot
+     # get attributs from mapping file
+FIX input stream
+      for l in inputStream:
+        self.logger.debug("input read: %s ",l)
+        line= l.rstrip()
+        line.split()
+        self.logger.debug("Split %s <=> %s ",line[0],line[1])
+        if l[0] == self.pivot:
+          username = l[1]
+          break
+        else :
+          self.logger.debug("%s is not pivot attribut",l[0])
+      if not username:
+        self.logger.debug(" no pivot values found ")
+        exit(255)
+      else:
+        self.logger.debug(" pivot value found : %s",l[1])
+
+      self.get_user_details(username,mapping.values())
       print("dn: " + username)
-      for index, value in enumerate(self.get_user_details(username,attributs)):
-          if value :
-              print(attributs[index]+": "+value)
+      for index, value in enumerate(self.get_user_details(username,mapping.values())):
+        if value :
+           print(attributs[index]+": "+value)
     except Exception as x:
-      pprint(x)
+      self.logger.debug("Exception : %s",str(x))
+      exit(255)
 
 # IN  :
 ##  dn: DN
@@ -173,8 +200,9 @@ class PaperCut:
       self.proxy.api.addNewUser(self.token, username )
       self.proxy.api.setUserProperties(self.token, username, modifTab)
     except Exception as x :
-      pprint(x)
-    pprint(modifTab)
+      exit(255)
+#      pprint(x)
+#    pprint(modifTab)
 
 # IN  : dn: DN
 ##   changetype: modify
@@ -193,7 +221,7 @@ class PaperCut:
     inputData.parse_entry_records()
 
 #    pprint(strinputStream)
-    pprint(inputData.all_records)
+#    pprint(inputData.all_records)
 
     for ldapField, paperCutField in self.mapping.items():
         tab=[]
@@ -207,7 +235,8 @@ class PaperCut:
     try: 
       self.proxy.api.setUserProperties(self.token, username, modifTab)
     except Exception as x:
-      pprint(x)
+     exit(255)
+#     pprint(x)
 
 
 # IN  :
@@ -219,7 +248,8 @@ class PaperCut:
     try:
       self.proxy.api.deleteExistingUser(self.token, username)
     except Exception as x:
-      pprint(x)
+      exit(255)
+
 # IN  :
 ##  dn: DN
 ##  changetype: modrdn
@@ -252,20 +282,20 @@ class TAG:
 
   def getPaperCutCard(self):
     if [ self.typeTag == "HEX" ]:
-      print("== TAG  :  " + self.tag + " v courte" + self.tag[0:9] + " " + self.tag[8:16])
+#      print("== TAG  :  " + self.tag + " v courte" + self.tag[0:9] + " " + self.tag[8:16])
       flag="00000000"
       prefix=self.tag[0:8]
 
       # test si mifare classic, les octaet de poid fort sont à 0
       if flag == prefix :
-        print("  == le tag est un Mifare Classic")
+  #      print("  == le tag est un Mifare Classic")
         lowerTag=self.tag[8:16]
         tagConvert=lowerTag[6:8]+lowerTag[4:6]+lowerTag[2:4]+lowerTag[0:2]
         completeTag=self.mappingHpPrefix['MifareClassic'] + tagConvert
 
       else:
-        print("  == le tag est un Desfire")
+#        print("  == le tag est un Desfire")
         completeTag=self.mappingHpPrefix['DesfireV2'] + self.tag[2:]
-      print("  == CARTE : " + completeTag)
+ #     print("  == CARTE : " + completeTag)
     return(completeTag.upper())
 
