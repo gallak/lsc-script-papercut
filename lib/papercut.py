@@ -33,13 +33,13 @@ class PaperCut:
 
   mapping         = {}
   pivot           = ''
-
   logger	  = ''
 
   def __init__(self):
     ''' Constructor for this class. '''
     self.logger = logging.getLogger('pcLog.papercut')
     self.logger.debug("creation de l'objet")
+
 
   def connect(self):
     try:
@@ -87,6 +87,9 @@ class PaperCut:
     except xmlrpc.client.ProtocolError as error:
         print("\nA protocol error occurred\nURL: {}\nHTTP/HTTPS headers: {}\nError code: {}\nError message: {}".format(error.url, error.headers, error.errcode, error.errmsg))
         exit(1)
+    except Exception as x:
+        pprint(x)
+
     return properties
 
   def show_all_user_details(self,attributs):
@@ -143,36 +146,36 @@ class PaperCut:
 ##  attribute2: abc
 ##  attribute3: def
 # ARG : nothing
-  def getPapercutLscExec(self,inputStream):
+  def getPapercutLscExec(self,dn,inputStream):
     username = ''
+    pcAttributsList=list(self.mapping.values())
     try:
-#      fixe get username from inpustream  et  filtre avec l'attribut lsc-pivot
-     # get attributs from mapping file
-FIX input stream
       for l in inputStream:
         self.logger.debug("input read: %s ",l)
-        line= l.rstrip()
-        line.split()
-        self.logger.debug("Split %s <=> %s ",line[0],line[1])
-        if l[0] == self.pivot:
-          username = l[1]
+        inputArray = l.strip().split(": ")
+        self.logger.debug("Split %s to %s",l.strip(),str(inputArray))
+        if inputArray[0] == self.pivot:
+          username = inputArray[1]
           break
         else :
-          self.logger.debug("%s is not pivot attribut",l[0])
+          self.logger.debug("%s is not pivot attribut",inputArray[0])
       if not username:
         self.logger.debug(" no pivot values found ")
         exit(255)
       else:
-        self.logger.debug(" pivot value found : %s",l[1])
+        self.logger.debug(" pivot value found : %s",inputArray[1])
 
-      self.get_user_details(username,mapping.values())
-      print("dn: " + username)
-      for index, value in enumerate(self.get_user_details(username,mapping.values())):
-        if value :
-           print(attributs[index]+": "+value)
+      self.logger.debug("Request %s for user %s",str(pcAttributsList),username)
+      fetchedValues=self.get_user_details(username,pcAttributsList)
+      print("dn: " + dn)
+      i=0
+      while i < len(pcAttributsList):
+        if fetchedValues[i]:
+          print(pcAttributsList[i] + ": " + fetchedValues[i])
+        i+=1
     except Exception as x:
       self.logger.debug("Exception : %s",str(x))
-      exit(255)
+    exit(0)
 
 # IN  :
 ##  dn: DN
@@ -182,15 +185,20 @@ FIX input stream
 ##  attribute3: def
 # OUT : nothing
 # ARG : script is called with the destination main identifier as argument
-  def addPapercutLscExec(self, username,inputStream):
+  def addPapercutLscExec(self,inputStream):
 
     modifTab=[]
     inputData = ldif.LDIFRecordList(inputStream)
     inputData.parse()
+    ldapRecord = inputData.all_records[0][1]
+    self.logger.debug("Fetch paperCut username")
+    username = ldapRecord['username'][0].decode()
+    del ldapRecord['username']
+
     for ldapField, paperCutField in self.mapping.items():
         tab=[]
         try :
-            valueLdapField = inputData.all_records[0][1][ldapField][0].decode()
+            valueLdapField = ldapRecord[ldapField][0].decode()
         except KeyError as error:
             continue
         tab.append(paperCutField)
