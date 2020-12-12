@@ -1,5 +1,4 @@
 #!/bin/bash
-SCRIPT_PATH=/srv/lsc-script-papercut
-source $SCRIPT_PATH/env/bin/activate
-$SCRIPT_PATH/run.py --action delOneUser --user $1
+source $LSC_PC_BIN_PATH/env/bin/activate
+$LSC_PC_BIN_PATH/run.py --action delOneUser --user $1
 exit $?
