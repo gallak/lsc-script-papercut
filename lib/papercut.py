@@ -286,9 +286,14 @@ class PaperCut:
 ##  changetype: delete
 # OUT : nothing
 # ARG : script is called with the destination main identifier as argument.
-  def removePapercutLscExec(self, username):
+  def removePapercutLscExec(self, dn):
     self.logger = logging.getLogger('pcLog.papercut.REMOVE')
-
+    rdn=dn.split(",")[0].split('=')
+    if rdn[0] == self.pivot:
+      username=rdn[1]
+    else:
+      self.logger.debug(" no pivot values found ")
+      exit(255)
     try:
       self.proxy.api.deleteExistingUser(self.token, username)
     except Exception as x:
