@@ -42,8 +42,9 @@ if __name__ == '__main__':
   pcCnx=papercut.PaperCut()
   pcCnx.url=confParser["server"].get("url")
   pcCnx.token=confParser["server"].get("token")
-  pcCnx.mapping=dict(confParser["lsc-mapping"])
-  pcCnx.pivot=confParser["lsc-pivot"].get("pivot")
+  #pcCnx.mapping=dict(confParser["lsc-mapping"])
+  pcCnx.pivot=confParser["lsc-link"].get("pivot")
+  pcCnx.papercutAttributs=confParser["lsc-link"].get("papercut-attributs").split(",")
 #  pcCnx.logger = logger
   pcCnx.connect()
 
@@ -61,7 +62,7 @@ if __name__ == '__main__':
     elif arguments.action == "dumpAllUser" :
       pcCnx.show_all_user_details(PcAttributs)
     elif arguments.action == "createOneUser" :
-     pcCnx.addPapercutLscExec(sys.stdin)
+     pcCnx.addPapercutLscExec(arguments.user,sys.stdin)
     else :
      logger.debug("%s is not a valid action see --help options")
      exit(255)
