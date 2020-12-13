@@ -134,7 +134,7 @@ class PaperCut:
   def listPapercutLscExec(self):
     self.logger = logging.getLogger('pcLog.papercut.LIST')
     for username in self.list_users():
-      print("dn: " + self.pivot + ": " + username + ",ou=people,dc=demo,dc=fusion")
+      print("dn: " + self.pivot + "=" + username + ",ou=fake,dc=dn")
       print(self.pivot + ": " + username)
       print("")
       self.logger.debug("user returned %s ", username)
@@ -167,13 +167,12 @@ class PaperCut:
 
       self.logger.debug("Request %s for user %s",str(self.papercutAttributs),username)
       fetchedValues=self.get_user_details(username,self.papercutAttributs)
-      self.logger.debug("LDIF: dn: %s",dn)
+
       print("dn: " + dn)
       i=0
       while i < len(self.papercutAttributs):
         if fetchedValues[i]:
           print(self.papercutAttributs[i] + ": " + fetchedValues[i])
-          self.logger.debug("LDIF: %s: %s ",self.papercutAttributs[i],fetchedValues[i])
           self.logger.debug("%s is %s",self.papercutAttributs[i], fetchedValues[i])
         i+=1
     except Exception as x:
