@@ -2,18 +2,14 @@
 # https://pypi.org/project/randomuser/
 
 import pprint
-import configparser
 import logging
 import sys
+import os
 from argparse import ArgumentParser
 from lib import papercut
 
 
 
-# import de la configuration
-confParser = configparser.ConfigParser()
-confParser.optionxform = lambda option: option
-confParser.read("/srv/lsc-script-papercut/papercut.cfg")
 
 # creation du logger
 logger = logging.getLogger("pcLog")
@@ -23,7 +19,8 @@ formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(messag
 #loglevel=confParser["log"].get("loglevel")
 logger.setLevel(logging.DEBUG)
 # handler
-fh = logging.FileHandler(confParser["log"].get("logfile"))
+debugfile=os.environ.get("LSC_PC_LOG_FILE")
+fh = logging.FileHandler(debugfile)
 #fh.setLevel(logging.confParser["log"].get("loglevel"))
 fh.setLevel(logging.DEBUG)
 fh.setFormatter(formatter)
@@ -40,12 +37,11 @@ cliParser.add_argument("--user", help="username to use for get/updateOne/delete 
 
 if __name__ == '__main__':
   pcCnx=papercut.PaperCut()
-  pcCnx.url=confParser["server"].get("url")
-  pcCnx.token=confParser["server"].get("token")
-  #pcCnx.mapping=dict(confParser["lsc-mapping"])
-  pcCnx.pivot=confParser["lsc-link"].get("pivot")
-  pcCnx.papercutAttributs=confParser["lsc-link"].get("papercut-attributs").split(",")
-#  pcCnx.logger = logger
+  # Init Class witch value
+  pcCnx.url=os.environ.get("LSC_PC_URL")
+  pcCnx.token=os.environ.get("LSC_PC_TOKEN")
+  pcCnx.pivot=os.environ.get("LSC_PC_PIVOT")
+  pcCnx.papercutAttributs=os.environ.get("LSC_PC_ATTRIBUTS").split(",")
   pcCnx.connect()
 
   arguments = cliParser.parse_args()
