@@ -48,6 +48,17 @@ class PaperCut:
     except all as error:
       pprint.pprint(error)
 
+  def getIdFromDn(dn):
+    username = ''
+    rdn=dn.split(",")[0].split('=')
+    if rdn[0] == self.pivot:
+      return(rdn[1])
+    else:
+      logger.debug(" no pivot values found ")
+    exit(255)
+
+
+
 # retourne user list
   def list_users(self):
     offset = 0
@@ -125,6 +136,10 @@ class PaperCut:
     pprint(str(msg))
 
 
+
+
+
+
 #https://lsc-project.org/documentation/plugins/executable/howto_scripts
 # IN  : nothing
 # OUT :
@@ -140,6 +155,9 @@ class PaperCut:
       self.logger.debug("user returned %s ", username)
 
 
+
+
+
 # IN  :
 ##   pivot1: aaa
 ##   pivot2: xxx
@@ -149,22 +167,22 @@ class PaperCut:
 ##  attribute2: abc
 ##  attribute3: def
 # ARG : nothing
-  def getPapercutLscExec(self,dn,inputStream):
+  def getPapercutLscExec(self,dn):
     self.logger = logging.getLogger('pcLog.papercut.GET')
-    username = ''
-    rdn=dn.split(",")[0].split('=')
-    if rdn[0] == self.pivot:
-      username=rdn[1]
-    else:
-      self.logger.debug(" no pivot values found ")
-      exit(255)
+#    username = ''
+#    rdn=dn.split(",")[0].split('=')
+#    if rdn[0] == self.pivot:
+#      username=rdn[1]
+#    else:
+#      self.logger.debug(" no pivot values found ")
+#      exit(255)
 
     try:
-      for l in inputStream:
-        self.logger.debug("InputStream read: %s ",l)
-        inputArray = l.strip().split(": ")
-        self.logger.debug("Split %s to %s",l.strip(),str(inputArray))
-
+ #     for l in inputStream:
+ #       self.logger.debug("InputStream read: %s ",l)
+ #       inputArray = l.strip().split(": ")
+ #       self.logger.debug("Split %s to %s",l.strip(),str(inputArray))
+      username = self.getIdFromDn(dn)
       self.logger.debug("Request %s for user %s",str(self.papercutAttributs),username)
       fetchedValues=self.get_user_details(username,self.papercutAttributs)
 
@@ -187,47 +205,15 @@ class PaperCut:
 ##  attribute3: def
 # OUT : nothing
 # ARG : script is called with the destination main identifier as argument
-  def addPapercutLscExec(self,dn,inputStream):
+  def addPapercutLscExec(self,dn):
     self.logger = logging.getLogger('pcLog.papercut.ADD')
-    modifTab=[]
 
-    self.logger.debug("try to fetch pivot value from dn: %s",dn)
-    rdn=dn.split(",")[0].split('=')
-    if rdn[0] == self.pivot:
-      username=rdn[1]
-    else:
-      self.logger.debug(" no pivot values found ")
-      exit(255)
+    username = self.getIdFromDn(dn)
     self.logger.debug(" Create new user %s",username)
     try:
       self.proxy.api.addNewUser(self.token, username)
     except Exception as x:
       self.logger.debug("Unable tu create account %s : %s",username,str(x))
-      exit(255)
-
-    self.logger.debug("User %s created, currently fill it",username)
-
-    inputData = ldif.LDIFRecordList(inputStream)
-    inputData.parse()
-    ldapRecord = inputData.all_records[0][1]
-
-    for item in ["-","changetype","username","dn"]:
-      try:
-        del ldapRecord[item]
-      except KeyError as x:
-        self.logger.debug("No %s element to clean",item)
-
-    for paperCutField in ldapRecord.keys():
-      tab=[]
-      self.logger.debug("Reading %s",  paperCutField)
-      tab.append(paperCutField)
-      tab.append(fixCMSCarID(paperCutField,ldapRecord[paperCutField][0].decode()))
-      self.logger.debug("Element to add : %s ",str(tab))
-      modifTab.append(tab)
-    try: 
-      self.proxy.api.setUserProperties(self.token, username, modifTab)
-    except Exception as x:
-      self.logger.debug("Problem  : %s ",str(x))
       exit(255)
 
 
@@ -241,38 +227,9 @@ class PaperCut:
 # OUT : nothing
 # ARG : script is called with the destination main identifier as argument.
 
-  def updatePapercutLscExec(self, dn,inputStream):
+  def updatePapercutLscExec(self, dn,values):
     self.logger = logging.getLogger('pcLog.papercut.UPDATE')
-
-    modifTab=[]
-    tab=[]
-
-    self.logger.debug("try to fetch pivot value from dn: %s",dn)
-    rdn=dn.split(",")[0].split('=')
-    if rdn[0] == self.pivot:
-      username=rdn[1]
-    else:
-      self.logger.debug(" no pivot values found ")
-      exit(255)
-    # read LDIF update send by LSC : mapping field between LSC and Ppaercut is assured by LSC Config
-    inputData = ldif.LDIFRecordList(inputStream)
-    inputData.parse_entry_records()
-    ldapRecord=inputData.all_records[0][1]
-    self.logger.debug("clean LDAP Record, keep only field to add or change")
-    # username is trashed, username could be send for an update, only for a creation
-    for item in ["-","replace","changetype","add","username"]:
-      try:
-        del ldapRecord[item]
-      except KeyError as x:
-        self.logger.debug("No %s element to clean",item)
-
-    for paperCutField in ldapRecord.keys():
-      tab=[]
-      self.logger.debug("Reading %s",  paperCutField)
-      tab.append(paperCutField)
-      tab.append(fixCMSCarID(paperCutField,ldapRecord[paperCutField][0].decode()))
-      self.logger.debug("Element to add : %s ",str(tab))
-      modifTab.append(tab)
+    username = self.getIdFromDn(dn)
     try: 
       self.proxy.api.setUserProperties(self.token, username, modifTab)
     except Exception as x:
@@ -288,12 +245,7 @@ class PaperCut:
 # ARG : script is called with the destination main identifier as argument.
   def removePapercutLscExec(self, dn):
     self.logger = logging.getLogger('pcLog.papercut.REMOVE')
-    rdn=dn.split(",")[0].split('=')
-    if rdn[0] == self.pivot:
-      username=rdn[1]
-    else:
-      self.logger.debug(" no pivot values found ")
-      exit(255)
+    username = self.getIdFromDn(dn)
     try:
       self.proxy.api.deleteExistingUser(self.token, username)
     except Exception as x:
