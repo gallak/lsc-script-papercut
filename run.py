@@ -12,7 +12,7 @@ import ldif
 
 
 
-# creation du logger
+# Logger creation
 logger = logging.getLogger("pcLog")
 # format de log
 formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -34,7 +34,6 @@ logger.addHandler(fh)
 cliParser=ArgumentParser( prog = 'run', description =""" Script used to sync PAPERCUT with LSC trough lsc plugin exec""")
 cliParser.add_argument("--user", help="username to use for get/updateOne/delete user from PAPERCUT server", type =str)
 
-
 def convertLdapRecord(ldapRecord):
   # clean LDAP phase
   for item in ["-","changetype","username","dn","replace","add"]:
@@ -46,7 +45,7 @@ def convertLdapRecord(ldapRecord):
   data=[]
   for key, value in ldapRecord.items():
     val=[key,value[0].decode()]
-    FIXME: faire la conversion de TAG
+    #FIXME: faire la conversion de TAG
     data.append(val)
   return(data)
 
@@ -54,47 +53,46 @@ def convertLdapRecord(ldapRecord):
 if __name__ == '__main__':
   pcCnx=papercut.PaperCut()
   # Init Class witch value
-  pcCnx.url=os.environ.get("LSC_PC_URL")
-  
-  pcCnx.token=os.environ.get("LSC_PC_TOKEN")
-  pcCnx.pivot=os.environ.get("LSC_PC_PIVOT")
-  pcCnx.papercutAttributs=os.environ.get("LSC_PC_ATTRIBUTS").split(",")
+  pcCnx.url               =os.environ.get("LSC_PC_URL")
+  pcCnx.token             =os.environ.get("LSC_PC_TOKEN")
+  pcCnx.pivot             =os.environ.get("LSC_PC_PIVOT")
+  pcCnx.papercutAttributs =os.environ.get("LSC_PC_ATTRIBUTS").split(",")
   pcCnx.connect()
 
-  pivot=os.environ.get("LSC_PC_PIVOT")
-
   arguments = cliParser.parse_args()
-
-  if sys.stdin.isatty() :
-    print("pas d'input  c'est une liste")
-    #pcCnx.listPapercutLscExec()
-  else:
-    try : 
-      inputData = ldif.LDIFRecordList(sys.stdin)
-      inputData.parse()
+  # If reading LDIF failed because it's malformed, it seems that implies a get Action
+  # It seems than an empty input didn't throw an error at LDIFRecord and parse() functions
+  try :
+    inputData = ldif.LDIFRecordList(sys.stdin)
+    inputData.parse()
+    try :
+      # If reading an empty record , an index errors occurs
       ldapRecord = inputData.all_records[0][1]
-      try : 
+      try :
         ldapAction = ldapRecord['changetype'][0].decode()
       except Exception as e:
-        print("ca chie ")
+        logger.debug("Error while parsing stdin")
         exit(255)
       if ldapAction  == "add":
-        print("Ajout de" + getIdFromDn(arguments.user) + "Values :  " +  str(convertLdapRecord(ldapRecord)))
-        #pcCnx.addPapercutLscExec(arguments.user)
-        #pcCnx.updatePapercutLscExec(arguments.user,convertLdapRecord(ldapRecord)))
+        logger.debug("Add %s with following values %s", pcCnx.getIdFromDn(arguments.user),str(convertLdapRecord(ldapRecord)))
+        pcCnx.addPapercutLscExec(arguments.user)
+        pcCnx.updatePapercutLscExec(arguments.user,convertLdapRecord(ldapRecord))
       elif ldapAction == "modify":
-        print("Modif de" + getIdFromDn(arguments.user) + "Values :  " +  str(convertLdapRecord(ldapRecord)))
-        #pcCnx.updatePapercutLscExec(arguments.user,convertLdapRecord(ldapRecord)))
+        logger.debug("Modify %s with following values %s", pcCnx.getIdFromDn(arguments.user),str(convertLdapRecord(ldapRecord)))
+        pcCnx.updatePapercutLscExec(arguments.user,convertLdapRecord(ldapRecord))
       elif ldapAction == "delete":
-        print("Suppresion de" + getIdFromDn(arguments.user) + "Values :  " +  str(convertLdapRecord(ldapRecord)))
-        #pcCnx.removePapercutLscExec(arguments.user)
+        logger.debug("Delete %s ", pcCnx.getIdFromDn(arguments.user))
+        pcCnx.removePapercutLscExec(arguments.user)
       elif ldapAction == "modrdn":
-        print("c'est un renomage")
+        logger.debug("Rename %s ", pcCnx.getIdFromDn(arguments.user))
+        logger.debug("Not implemented yet")
       else:
-        print("c'est autre chose")
-
-#      print("c'est autre chose" + str(ldapRecord))
-    except ValueError as e:
-      print("c'est un getUSer")
-      #pcCnx.getPapercutLscExec(arguments.user,sys.stdin)
-
+        logger.debug("Unknowk Ldif action detected")
+        exit(155)
+    except IndexError as e:
+      logger.debug("Error while parsing stdin %s",str(e))
+      logger.debug("PC user list generation")
+      pcCnx.listPapercutLscExec()
+  except ValueError as e:
+    logger.debug("Get information from %s", pcCnx.getIdFromDn(arguments.user))
+    pcCnx.getPapercutLscExec(arguments.user)

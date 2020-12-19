@@ -9,10 +9,6 @@ import ldif
 
 logger = logging.getLogger("pcLog")
 
-#from ldap import modlist
-
-#https://living-sun.com/fr/python/706390-python-ldap-lib-import-ldif-python-openldap-python-ldap.html
-
 # This fonction translate RFID Tag read fromla a classic reader and store in supannCMSCard fielad
 def fixCMSCarID(field,value):
    if field == "supannCMSCard":
@@ -20,8 +16,6 @@ def fixCMSCarID(field,value):
        return(localTag.getPaperCutCard())
    else:
        return(value)
-
-
 
 class PaperCut:
 
@@ -48,7 +42,7 @@ class PaperCut:
     except all as error:
       pprint.pprint(error)
 
-  def getIdFromDn(dn):
+  def getIdFromDn(self,dn):
     username = ''
     rdn=dn.split(",")[0].split('=')
     if rdn[0] == self.pivot:
@@ -77,14 +71,9 @@ class PaperCut:
             print("\nA protocol error occurred\nURL: {}\nHTTP/HTTPS headers: {}\nError code: {}\nError message: {}".format(
                 error.url, error.headers, error.errcode, error.errmsg))
             exit(1)
-#        if limit == 0 or len(user_list) < limit:
-#            print(" boucle et limitre de merde !!!!   ya perosne")
-#            break # We have reached the end
-
         offset += limit # We need to next slice of users
         return_list += user_list
         if limit == 0 or len(user_list) < limit:
-            #print(" boucle et limitre de merde !!!!   ya perosne")
             break # We have reached the end
 
     return return_list
@@ -154,10 +143,6 @@ class PaperCut:
       print("")
       self.logger.debug("user returned %s ", username)
 
-
-
-
-
 # IN  :
 ##   pivot1: aaa
 ##   pivot2: xxx
@@ -167,21 +152,12 @@ class PaperCut:
 ##  attribute2: abc
 ##  attribute3: def
 # ARG : nothing
+# FIXME normally pivot attribut and their  values are fetch from input
+
   def getPapercutLscExec(self,dn):
     self.logger = logging.getLogger('pcLog.papercut.GET')
-#    username = ''
-#    rdn=dn.split(",")[0].split('=')
-#    if rdn[0] == self.pivot:
-#      username=rdn[1]
-#    else:
-#      self.logger.debug(" no pivot values found ")
-#      exit(255)
 
     try:
- #     for l in inputStream:
- #       self.logger.debug("InputStream read: %s ",l)
- #       inputArray = l.strip().split(": ")
- #       self.logger.debug("Split %s to %s",l.strip(),str(inputArray))
       username = self.getIdFromDn(dn)
       self.logger.debug("Request %s for user %s",str(self.papercutAttributs),username)
       fetchedValues=self.get_user_details(username,self.papercutAttributs)
@@ -231,7 +207,7 @@ class PaperCut:
     self.logger = logging.getLogger('pcLog.papercut.UPDATE')
     username = self.getIdFromDn(dn)
     try: 
-      self.proxy.api.setUserProperties(self.token, username, modifTab)
+      self.proxy.api.setUserProperties(self.token, username, values)
     except Exception as x:
       self.logger.debug("Problem  : %s ",str(x))
       exit(255)
@@ -283,20 +259,16 @@ class TAG:
 
   def getPaperCutCard(self):
     if [ self.typeTag == "HEX" ]:
-#      print("== TAG  :  " + self.tag + " v courte" + self.tag[0:9] + " " + self.tag[8:16])
       flag="00000000"
       prefix=self.tag[0:8]
 
       # test si mifare classic, les octaet de poid fort sont à 0
       if flag == prefix :
-  #      print("  == le tag est un Mifare Classic")
         lowerTag=self.tag[8:16]
         tagConvert=lowerTag[6:8]+lowerTag[4:6]+lowerTag[2:4]+lowerTag[0:2]
         completeTag=self.mappingHpPrefix['MifareClassic'] + tagConvert
 
       else:
-#        print("  == le tag est un Desfire")
         completeTag=self.mappingHpPrefix['DesfireV2'] + self.tag[2:]
- #     print("  == CARTE : " + completeTag)
     return(completeTag.upper())
 
