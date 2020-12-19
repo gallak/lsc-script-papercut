@@ -10,47 +10,57 @@ balance', 'card-number', 'card-pin', 'department',
 # how to add username aliasing
 https://www.papercut.com/support/resources/manuals/ng-mf/applicationserver/topics/user-username-aliasing.html
 
-
 # how to active XML-RPC interface
 https://www.papercut.com/support/resources/manuals/ng-mf/common/topics/tools-web-services.html
 
 # install
-apt-get install python3 virtualenv python3-virtualenv python3-ldap
-virtualenv -p python3 env
+apt-get install python3 virtualenv python3-virtualenv
+git clone https://github.com/gallak/lsc-script-papercut.git
+cd lsc-script-papercut
+virtualenv -p python3 .
+pip install -r requirements.txt
+
+# connector insode LSC
+see inside ./lsc directory
 
 
-# example
-(env) root@ltb-dev:/srv/lsc-script-papercut# ./run.py --action getAllUser
-(env) root@ltb-dev:/srv/lsc-script-papercut# cat test-add.ldif | ./run.py --action createOneUser --user john.doe
-(env) root@ltb-dev:/srv/lsc-script-papercut# cat test-add.ldif | ./run.py --action updateOneUser --user john.doe
-(env) root@ltb-dev:/srv/lsc-script-papercut# ./run.py --action getOneUser --user first-user
-dn: john.doe
-username-alias: jdoe
-full-name: Ze Big Boss
-email: user@financial
-primary-card-number: 007234
-secondary-card-number: r007f01383453453453453
-office: Building 1
-department: Financial service
-notes: VIP ( got all money)
-(env) root@ltb-dev:/srv/lsc-script-papercut# ./run.py --action getAllUser
-john.doe
-(env) root@ltb-dev:/srv/lsc-script-papercut# ./run.py --action delOneUser --user john.doe
-(env) root@ltb-dev:/srv/lsc-script-papercut# ./run.py --action getAllUser
-(env) root@ltb-dev:/srv/lsc-script-papercut# 
 
+# example in DEBUG mode
 
-# ldif file
+-- add and update phase
 
-dn: uid=john.doe,ou=people,dc=company,dc=com
+INFO  - Starting sync for Users
+DEBUG - Update condition false. Should have modified object uid=blueelephant502,ou=people,dc=demo,dc=fusion
+dn: uid=blueelephant502,ou=people,dc=demo,dc=fusion
+changetype: modify
+replace: notes
+notes: le mot de passe de blueelephant502 est poopy avec un modif en plus c'est cool
+-
+ERROR - Entries count: 0
+DEBUG - Create condition false. Should have added object uid=greenduck658,ou=people,dc=demo,dc=fusion
+dn: uid=greenduck658,ou=people,dc=demo,dc=fusion
 changetype: add
-mail: user@financial
-employeeNumber: 007234
-supannCMSCard: r007f01383453453453453
-supannAliasLogin: jdoe
-cn: Ze Big Boss
-roomNumber: Building 1
-description: VIP ( got all money)
-ou: Financial service
+notes: Ceci est une2 eme  modification
+username-alias: starter
+primary-card-number: teacher123454
+office: L3C1
+secondary-card-number: 0000carteproxlsb
+department: SCHOOL
+email: aaliyah.green@example.com
+full-name: Aaliyah Green
+INFO  - All entries: 3, to modify entries: 2, successfully modified entries: 0, errors: 0
+INFO  - Starting clean for Users
+DEBUG - Delete condition false. Should have removed object uid=whitebird737,ou=fake,dc=dn
+-- clean phase
+dn: uid=whitebird737,ou=fake,dc=dn
+changetype: delete
+
+INFO  - All entries: 3, to modify entries: 1, successfully modified entries: 0, errors: 0
+
+real	0m15.143s
+user	0m13.919s
+sys	0m1.138s
+
+
 
 
