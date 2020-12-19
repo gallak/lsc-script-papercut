@@ -1,4 +1,5 @@
 #!/bin/bash
 source $LSC_PC_BIN_PATH/env/bin/activate
-$LSC_PC_BIN_PATH/run.py --action delOneUser --user $1
+echo "phase de clean de $1" >> /tmp/action
+$LSC_PC_BIN_PATH/run.py --user $1
 exit $?

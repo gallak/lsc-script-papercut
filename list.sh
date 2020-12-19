@@ -1,4 +1,5 @@
 #!/bin/bash
 source $LSC_PC_BIN_PATH/env/bin/activate
-$LSC_PC_BIN_PATH/run.py --action getAllUser
+#echo "phase de list" >> /tmp/action
+$LSC_PC_BIN_PATH/run.py
 exit $?
