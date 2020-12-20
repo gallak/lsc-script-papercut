@@ -9,14 +9,6 @@ import ldif
 
 logger = logging.getLogger("pcLog")
 
-# This fonction translate RFID Tag read fromla a classic reader and store in supannCMSCard fielad
-def fixCMSCarID(field,value):
-   if field == "supannCMSCard":
-       localTag=TAG("HEX",value)
-       return(localTag.getPaperCutCard())
-   else:
-       return(value)
-
 class PaperCut:
 
   url             = 'http://papercut.site'
@@ -236,39 +228,7 @@ class PaperCut:
 # OUT :
 ##  dn: entry1 identifier
 ##  pivot1: aaa
-# ARG : script is called with the destination main identifier as argumen
+# ARG : script is called with the destination main identifier as argument
 ##  def renamePapercutLscExec():
 
-
-
-
-class TAG:
-  tag=''
-  typeTag=''
-
-  def __init__(self,typeTag,tag):
-    ''' Constructor for this class. '''
-    self.typeTag=typeTag
-    self.tag=tag
-
-  mappingHpPrefix = {
-    'DesfireV2' : "r007f0138",
-    'MifareClassic' : "r007f0120",
-  }
-
-
-  def getPaperCutCard(self):
-    if [ self.typeTag == "HEX" ]:
-      flag="00000000"
-      prefix=self.tag[0:8]
-
-      # test si mifare classic, les octaet de poid fort sont à 0
-      if flag == prefix :
-        lowerTag=self.tag[8:16]
-        tagConvert=lowerTag[6:8]+lowerTag[4:6]+lowerTag[2:4]+lowerTag[0:2]
-        completeTag=self.mappingHpPrefix['MifareClassic'] + tagConvert
-
-      else:
-        completeTag=self.mappingHpPrefix['DesfireV2'] + self.tag[2:]
-    return(completeTag.upper())
 
