@@ -32,7 +32,7 @@ logger.addHandler(fh)
 # option from commandline
 
 cliParser=ArgumentParser( prog = 'run', description =""" Script used to sync PAPERCUT with LSC trough lsc plugin exec""")
-cliParser.add_argument("--user", help="username to use for get/updateOne/delete user from PAPERCUT server", type =str)
+cliParser.add_argument("user", default="", help="username to use for get/updateOne/delete user from PAPERCUT server", type=str,nargs='?')
 
 def convertLdapRecord(ldapRecord):
   # clean LDAP phase
