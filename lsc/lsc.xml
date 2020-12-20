@@ -40,7 +40,8 @@
           <string>mail</string>
           <string>employeeNumber</string>
           <string>cn</string>
-          <string>supannCMSId;x-mifare-xlsb</string>
+          <string>supannCMSAffectation</string>
+          <string>supannCMSAppAffectation</string>
           <string>ou</string>
           <string>roomNumber</string>
           <string>employeNumber</string>
@@ -101,8 +102,7 @@
             </entry>
             <entry>
               <key>LSC_PC_TOKEN</key>
-              <value>TestAPIKey</value>
-            </entry>
+              <value>TestAPIKey</value>            </entry>
             <entry>
               <key>LSC_PC_PIVOT</key>
               <value>uid</value>
@@ -116,7 +116,6 @@
             <string>username-alias</string>
             <string>notes</string>
             <string>email</string>
-<!--            <string>username</string> -->
             <string>full-name</string>
             <string>secondary-card-number</string>
             <string>primary-card-number</string>
@@ -135,14 +134,6 @@
           <delete>true</delete>
           <changeId>false</changeId>
         </conditions>
-<!--        <dataset>
-          <name>username</name>
-          <policy>FORCE</policy>
-          <forceValues>
-            <string>srcBean.getDatasetFirstValueById("uid")</string>
-          </forceValues>
-        </dataset> -->
-
         <dataset>
           <name>username-alias</name>
           <policy>FORCE</policy>
@@ -171,13 +162,24 @@
             <string>srcBean.getDatasetFirstValueById("displayName")</string>
           </forceValues>
         </dataset>
+<!-- This config implies that there only one value -->
         <dataset>
           <name>secondary-card-number</name>
           <policy>FORCE</policy>
           <forceValues>
-            <string>srcBean.getDatasetFirstValueById("supannCMSId;x-mifare-xlsb").toLowerCase()</string>
+            <string>js:extractPCId(srcBean.getDatasetFirstValueById("supannCMSAffectation"))</string>
           </forceValues>
         </dataset>
+<!--
+        <dataset>
+          <name>secondary-card-number</name>
+          <policy>FORCE</policy>
+          <forceValues>
+            <string>js:extractPCIdPerApp(srcBean.getDatasetValuesById("supannCMSAppAffectation"),"PAPERCUT")</string>
+          </forceValues>
+        </dataset> -->
+
+
         <dataset>
           <name>primary-card-number</name>
           <policy>FORCE</policy>
@@ -203,6 +205,9 @@
 
 
       </propertiesBasedSyncOptions>
+      <scriptInclude>
+        <string>./lib/supannCMSId.js</string>
+      </scriptInclude>
     </task>
   </tasks>
 </lsc>
