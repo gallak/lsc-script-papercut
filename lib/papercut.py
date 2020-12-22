@@ -98,7 +98,7 @@ class PaperCut:
       for value in properties:
           if value :
               msg = msg +";" + value
-      pprint(str(msg))
+      #pprint(str(msg))
 
 
   def show_user_details(self,user,attributs):
@@ -114,7 +114,7 @@ class PaperCut:
     for value in properties:
         if value :
             msg = msg +";" + value
-    pprint(str(msg))
+    #pprint(str(msg))
 
 
 
@@ -128,7 +128,7 @@ class PaperCut:
 ##  pivot1: aaa
 # ARG : nothing
   def listPapercutLscExec(self):
-    self.logger = logging.getLogger('pcLog.papercut.LIST')
+    #self.logger = logging.getLogger('pcLog.papercut.LIST')
     for username in self.list_users():
       print("dn: " + self.pivot + "=" + username + ",ou=fake,dc=dn")
       print(self.pivot + ": " + username)
@@ -147,7 +147,7 @@ class PaperCut:
 # FIXME normally pivot attribut and their  values are fetch from input
 
   def getPapercutLscExec(self,dn):
-    self.logger = logging.getLogger('pcLog.papercut.GET')
+    #self.logger = logging.getLogger('pcLog.papercut.GET')
 
     try:
       username = self.getIdFromDn(dn)
@@ -174,10 +174,10 @@ class PaperCut:
 # OUT : nothing
 # ARG : script is called with the destination main identifier as argument
   def addPapercutLscExec(self,dn):
-    self.logger = logging.getLogger('pcLog.papercut.ADD')
+    #self.logger = logging.getLogger('pcLog.papercut.ADD')
 
     username = self.getIdFromDn(dn)
-    self.logger.debug(" Create new user %s",username)
+    self.logger.debug("Create new user %s",username)
     try:
       self.proxy.api.addNewUser(self.token, username)
     except Exception as x:
@@ -195,10 +195,11 @@ class PaperCut:
 # OUT : nothing
 # ARG : script is called with the destination main identifier as argument.
 
-  def updatePapercutLscExec(self, dn,values):
-    self.logger = logging.getLogger('pcLog.papercut.UPDATE')
+  def updatePapercutLscExec(self,dn,values):
+    #self.logger = logging.getLogger('pcLog.papercut.UPDATE')
     username = self.getIdFromDn(dn)
-    try: 
+    try:
+      self.logger.debug("Update %s with %s",username,str(values))
       self.proxy.api.setUserProperties(self.token, username, values)
     except Exception as x:
       self.logger.debug("Problem  : %s ",str(x))
