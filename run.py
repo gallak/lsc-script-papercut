@@ -31,8 +31,8 @@ logger.addHandler(fh)
 
 # option from commandline
 
-cliParser=ArgumentParser( prog = 'run', description =""" Script used to sync PAPERCUT with LSC trough lsc plugin exec""")
-cliParser.add_argument("user", default="", help="username to use for get/updateOne/delete user from PAPERCUT server", type=str,nargs='?')
+#cliParser=ArgumentParser( prog = 'run', description =""" Script used to sync PAPERCUT with LSC trough lsc plugin exec""")
+#cliParser.add_argument("user", default="fakeuser", help="username to use for get/updateOne/delete user from PAPERCUT server", type=str,nargs='?')
 
 def convertLdapRecord(ldapRecord):
   # clean LDAP phase
@@ -59,13 +59,14 @@ if __name__ == '__main__':
   pcCnx.papercutAttributs =os.environ.get("LSC_PC_ATTRIBUTS").split(",")
   pcCnx.connect()
 
-  arguments = cliParser.parse_args()
+ # arguments = cliParser.parse_args()
   # If reading LDIF failed because it's malformed, it seems that implies a get Action
   # It seems than an empty input didn't throw an error at LDIFRecord and parse() functions
-  try :
-    inputData = ldif.LDIFRecordList(sys.stdin)
-    inputData.parse()
+  try:
+    user = sys.argv[1]
     try :
+      inputData = ldif.LDIFRecordList(sys.stdin)
+      inputData.parse()
       # If reading an empty record , an index errors occurs
       ldapRecord = inputData.all_records[0][1]
       try :
@@ -74,25 +75,28 @@ if __name__ == '__main__':
         logger.debug("Error while parsing stdin")
         exit(255)
       if ldapAction  == "add":
-        logger.debug("Add %s with following values %s", pcCnx.getIdFromDn(arguments.user),str(convertLdapRecord(ldapRecord)))
-        pcCnx.addPapercutLscExec(arguments.user)
-        pcCnx.updatePapercutLscExec(arguments.user,convertLdapRecord(ldapRecord))
+        logger.debug("Add %s with following values %s", pcCnx.getIdFromDn(user),str(convertLdapRecord(ldapRecord)))
+        pcCnx.addPapercutLscExec(user)
+        pcCnx.updatePapercutLscExec(user,convertLdapRecord(ldapRecord))
       elif ldapAction == "modify":
-        logger.debug("Modify %s with following values %s", pcCnx.getIdFromDn(arguments.user),str(convertLdapRecord(ldapRecord)))
-        pcCnx.updatePapercutLscExec(arguments.user,convertLdapRecord(ldapRecord))
+        logger.debug("Modify %s with following values %s", pcCnx.getIdFromDn(user),str(convertLdapRecord(ldapRecord)))
+        pcCnx.updatePapercutLscExec(user,convertLdapRecord(ldapRecord))
       elif ldapAction == "delete":
-        logger.debug("Delete %s ", pcCnx.getIdFromDn(arguments.user))
-        pcCnx.removePapercutLscExec(arguments.user)
+        logger.debug("Delete %s ", pcCnx.getIdFromDn(user))
+        pcCnx.removePapercutLscExec(user)
       elif ldapAction == "modrdn":
-        logger.debug("Rename %s ", pcCnx.getIdFromDn(arguments.user))
+        logger.debug("Rename %s ", pcCnx.getIdFromDn(user))
         logger.debug("Not implemented yet")
       else:
         logger.debug("Unknowk Ldif action detected")
         exit(155)
-    except IndexError as e:
-      logger.debug("Error while parsing stdin %s",str(e))
-      logger.debug("PC user list generation")
-      pcCnx.listPapercutLscExec()
-  except ValueError as e:
-    logger.debug("Get information from %s", pcCnx.getIdFromDn(arguments.user))
-    pcCnx.getPapercutLscExec(arguments.user)
+#    except IndexError as e:
+#      logger.debug("Error while parsing stdin %s",str(e))
+#      logger.debug("PC user list generation")
+#      pcCnx.listPapercutLscExec()
+    except Exception as e:
+      logger.debug("Get information from %s", pcCnx.getIdFromDn(user))
+      pcCnx.getPapercutLscExec(user)
+  except IndexError as e:
+    logger.debug("PC user list generation")
+    pcCnx.listPapercutLscExec()
