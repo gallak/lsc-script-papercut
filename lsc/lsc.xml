@@ -41,15 +41,15 @@
           <string>employeeNumber</string>
           <string>cn</string>
           <string>supannCMSAffectation</string>
-          <string>supannCMSAppAffectation</string>
+<!--          <string>supannCMSAppAffectation</string> -->
           <string>ou</string>
           <string>roomNumber</string>
           <string>employeNumber</string>
           <string>displayName</string>
         </fetchedAttributes>
-        <getAllFilter><![CDATA[(&(objectClass=inetOrgPerson)(supannListeRouge=TRUE))]]></getAllFilter>
-        <getOneFilter><![CDATA[(&(objectClass=inetOrgPerson)(uid={uid}))]]></getOneFilter>
-        <cleanFilter><![CDATA[(&(objectClass=inetOrgPerson)(uid={uid}))]]></cleanFilter>
+        <getAllFilter><![CDATA[(&(objectClass=inetOrgPerson)(uid=*)(supannListeRouge=TRUE))]]></getAllFilter>
+        <getOneFilter><![CDATA[(&(objectClass=inetOrgPerson)(uid={uid})(supannListeRouge=TRUE))]]></getOneFilter>
+        <cleanFilter><![CDATA[(&(objectClass=inetOrgPerson)(uid={uid})(supannListeRouge=TRUE))]]></cleanFilter>
       </ldapSourceService>
 <!--      <pluginSourceService implementationClass="org.lsc.plugins.connectors.fusiondirectory.FusionDirectorySrcService">
         <name>fusiondirectorysrcservice</name>
@@ -102,7 +102,8 @@
             </entry>
             <entry>
               <key>LSC_PC_TOKEN</key>
-              <value>TestAPIKey</value>            </entry>
+              <value>TestAPIKey</value>
+            </entry>
             <entry>
               <key>LSC_PC_PIVOT</key>
               <value>uid</value>
