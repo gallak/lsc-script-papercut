@@ -1,5 +1,40 @@
+# About LSC Script PAPERCUT
 
-# More details of XMLRPC Perpercut API
+Those scripts hase been created to sync data between LDAP tree to PAPERCUT solutions
+Syncing operation from LDAP providing by Papercut Aren't enough customizable.
+In my case I need to make some transformation on some attributs
+I found a solution by using LSC (https://lsc-project.org/doku.php) which could called some script see : https://lsc-project.org/documentation/plugins/executable
+
+# How to Use it :
+
+You need to :
+- Active XML-RPC interface on PaperCut
+- get a service account on LDAP Tree
+- LSC Ldap Synchronization Connector installled with exe plugin 
+
+## how to active XML-RPC interface
+https://www.papercut.com/support/resources/manuals/ng-mf/common/topics/tools-web-services.html
+
+## how to install lsc-script-papercut
+### install
+```
+apt-get install python3 virtualenv python3-virtualenv
+git clone https://github.com/gallak/lsc-script-papercut.git
+cd lsc-script-papercut
+virtualenv -p python3 .
+pip install -r requirements.txt
+```
+
+### Configuration
+
+see inside `lsc` subdirectory
+you need to configure the script trough variables exported
+
+
+# More details
+
+## More details of XMLRPC Perpercut API
+
 https://gist.github.com/damienatpapercut/67dee5d06ed47b3283ca
 Attributes availbale
 balance', 'card-number', 'card-pin', 'department',
@@ -13,21 +48,12 @@ https://www.papercut.com/support/resources/manuals/ng-mf/applicationserver/topic
 # how to active XML-RPC interface
 https://www.papercut.com/support/resources/manuals/ng-mf/common/topics/tools-web-services.html
 
-# install
-apt-get install python3 virtualenv python3-virtualenv
-git clone https://github.com/gallak/lsc-script-papercut.git
-cd lsc-script-papercut
-virtualenv -p python3 .
-pip install -r requirements.txt
 
-# connector insode LSC
-see inside ./lsc directory
+# HOW it runs ?
+## example in DEBUG and DRY-RUN mode
 
-
-
-# example in DEBUG mode
-
--- add and update phase
+```
+lsc -f . -s all -c all -n
 
 INFO  - Starting sync for Users
 DEBUG - Update condition false. Should have modified object uid=blueelephant502,ou=people,dc=demo,dc=fusion
@@ -62,5 +88,5 @@ user	0m13.919s
 sys	0m1.138s
 
 
-
+```
 
