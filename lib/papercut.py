@@ -24,28 +24,29 @@ class PaperCut:
   def __init__(self):
     ''' Constructor for this class. '''
     self.logger = logging.getLogger('pcLog.papercut')
-    self.logger.debug("creation de l'objet")
+    self.logger.debug("INIT: creation de l'objet")
 
-
+  # connection routien to PaperCut server
   def connect(self):
     try:
       self.proxy = ServerProxy(self.url + self.path, verbose=False,context = create_default_context(Purpose.CLIENT_AUTH))
-      self.logger.debug("Connexion")
+      self.logger.debug("CONNECT: Connection to %s",str(self.url+self.path))
     except all as error:
-      pprint.pprint(error)
+      self.logger.debug("CONNECT: Unable to connect to %s : %s ",str(self.url+self.path),str(error))
 
+  # extract username and check if it's the pivot attribut)
   def getIdFromDn(self,dn):
     username = ''
     rdn=dn.split(",")[0].split('=')
     if rdn[0] == self.pivot:
       return(rdn[1])
     else:
-      logger.debug(" no pivot values found ")
+      logger.debug("No pivot values found ")
     exit(255)
 
 
 
-# retourne user list
+  # retourne user list
   def list_users(self):
     offset = 0
     limit = 100
@@ -57,11 +58,10 @@ class PaperCut:
         try:
             user_list = self.proxy.api.listUserAccounts(self.token, offset,limit)
         except Fault as error:
-            print("\ncalled listUserAccounts(). Return fault is {}".format(error.faultString))
+            self.logger.debug("PC:listUserAccounts(): Return fault is %s",error.faultString)
             exit(1)
         except ProtocolError as error:
-            print("\nA protocol error occurred\nURL: {}\nHTTP/HTTPS headers: {}\nError code: {}\nError message: {}".format(
-                error.url, error.headers, error.errcode, error.errmsg))
+            self.logger.debug("PC:listUserAccounts(): A protocol error occurred to URL: %s nHTTP/HTTPS headers: %s Error code: %s Error message: %s",error.url, error.headers, error.errcode, error.errmsg)
             exit(1)
         offset += limit # We need to next slice of users
         return_list += user_list
@@ -74,47 +74,28 @@ class PaperCut:
     try:
         properties = self.proxy.api.getUserProperties(self.token,user,attributs)
     except xmlrpc.client.Fault as error:
-        print("\ncalled getUserProperty(). Return fault is {}".format(error.faultString))
+        self.logger.debug("PC:getUserProperty():  Return fault is %s",error.faultString)
         exit(1)
     except xmlrpc.client.ProtocolError as error:
-        print("\nA protocol error occurred\nURL: {}\nHTTP/HTTPS headers: {}\nError code: {}\nError message: {}".format(error.url, error.headers, error.errcode, error.errmsg))
+        self.logger.debug("PC:getUserProperty(): A protocol error occurred to URL: %s nHTTP/HTTPS headers: %s Error code: %s Error message: %s",error.url, error.headers, error.errcode,error.errmsg)
         exit(1)
     except Exception as x:
-        pprint(x)
+        self.logger.debug("PC:getUserProperty(): Error : %s",str(x))
+        exit(1)
 
     return properties
 
   def show_all_user_details(self,attributs):
     for user in self.list_users():
-      msg=user
-      try:
-          properties = self.proxy.api.getUserProperties(self.token,user,attributs)
-      except xmlrpc.client.Fault as error:
-          print("\ncalled getUserProperty(). Return fault is {}".format(error.faultString))
-          exit(1)
-      except xmlrpc.client.ProtocolError as error:
-          print("\nA protocol error occurred\nURL: {}\nHTTP/HTTPS headers: {}\nError code: {}\nError message: {}".format(error.url, error.headers, error.errcode, error.errmsg))
-          exit(1)
-      for value in properties:
-          if value :
-              msg = msg +";" + value
-      #pprint(str(msg))
-
+      self.show_user_details(user,attributs)
 
   def show_user_details(self,user,attributs):
     msg=user
-    try:
-        properties = self.proxy.api.getUserProperties(self.token,user,attributs)
-    except xmlrpc.client.Fault as error:
-        print("\ncalled getUserProperty(). Return fault is {}".format(error.faultString))
-        exit(1)
-    except xmlrpc.client.ProtocolError as error:
-        print("\nA protocol error occurred\nURL: {}\nHTTP/HTTPS headers: {}\nError code: {}\nError message: {}".format(error.url, error.headers, error.errcode, error.errmsg))
-        exit(1)
+    properties=self.get_user_details(user,attributs):
     for value in properties:
         if value :
             msg = msg +";" + value
-    #pprint(str(msg))
+    pprint(str(msg))
 
 
 
@@ -128,12 +109,12 @@ class PaperCut:
 ##  pivot1: aaa
 # ARG : nothing
   def listPapercutLscExec(self):
-    #self.logger = logging.getLogger('pcLog.papercut.LIST')
+    logPrefix="LIST"
     for username in self.list_users():
       print("dn: " + self.pivot + "=" + username + ",ou=fake,dc=dn")
       print(self.pivot + ": " + username)
       print("")
-      self.logger.debug("user returned %s ", username)
+      self.logger.debug("%s: user returned %s ", logPrefix,username)
 
 # IN  :
 ##   pivot1: aaa
@@ -147,11 +128,10 @@ class PaperCut:
 # FIXME normally pivot attribut and their  values are fetch from input
 
   def getPapercutLscExec(self,dn):
-    #self.logger = logging.getLogger('pcLog.papercut.GET')
-
+    logPrefix="GET"
     try:
       username = self.getIdFromDn(dn)
-      self.logger.debug("Request %s for user %s",str(self.papercutAttributs),username)
+      self.logger.debug("%s: Request %s for user %s",logPrefix,str(self.papercutAttributs),username)
       fetchedValues=self.get_user_details(username,self.papercutAttributs)
 
       print("dn: " + dn)
@@ -159,10 +139,10 @@ class PaperCut:
       while i < len(self.papercutAttributs):
         if fetchedValues[i]:
           print(self.papercutAttributs[i] + ": " + fetchedValues[i])
-          self.logger.debug("%s is %s",self.papercutAttributs[i], fetchedValues[i])
+          self.logger.debug("%s: %s is %s",logPrefix,self.papercutAttributs[i], fetchedValues[i])
         i+=1
     except Exception as x:
-      self.logger.debug("Exception : %s, %s shouldn't exist",str(x),username)
+      self.logger.debug("%s: Exception : %s, %s shouldn't exist",logPrefix,str(x),username)
     exit(0)
 
 # IN  :
@@ -174,14 +154,13 @@ class PaperCut:
 # OUT : nothing
 # ARG : script is called with the destination main identifier as argument
   def addPapercutLscExec(self,dn):
-    #self.logger = logging.getLogger('pcLog.papercut.ADD')
-
+    logPrefix="ADD"
     username = self.getIdFromDn(dn)
-    self.logger.debug("Create new user %s",username)
+    self.logger.debug("%s: Create new user %s",logPrefix,username)
     try:
       self.proxy.api.addNewUser(self.token, username)
     except Exception as x:
-      self.logger.debug("Unable tu create account %s : %s",username,str(x))
+      self.logger.debug("%s: Unable tu create account %s : %s",logPrefix,username,str(x))
       exit(255)
 
 
@@ -196,13 +175,13 @@ class PaperCut:
 # ARG : script is called with the destination main identifier as argument.
 
   def updatePapercutLscExec(self,dn,values):
-    #self.logger = logging.getLogger('pcLog.papercut.UPDATE')
+    logPrefix = "UPDATE"
     username = self.getIdFromDn(dn)
     try:
-      self.logger.debug("Update %s with %s",username,str(values))
+      self.logger.debug("%s: Update %s with %s",logPrefix,username,str(values))
       self.proxy.api.setUserProperties(self.token, username, values)
     except Exception as x:
-      self.logger.debug("Problem  : %s ",str(x))
+      self.logger.debug("%s: Problem  : %s ",logPrefix,str(x))
       exit(255)
 
 
@@ -213,11 +192,12 @@ class PaperCut:
 # OUT : nothing
 # ARG : script is called with the destination main identifier as argument.
   def removePapercutLscExec(self, dn):
-    self.logger = logging.getLogger('pcLog.papercut.REMOVE')
+    logPrefix = "REMOVE"
     username = self.getIdFromDn(dn)
     try:
       self.proxy.api.deleteExistingUser(self.token, username)
     except Exception as x:
+      self.logger.debug("%s: Problem  : %s ",logPrefix,str(x))
       exit(255)
 
 # IN  :

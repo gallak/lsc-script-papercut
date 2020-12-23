@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
-# https://pypi.org/project/randomuser/
 
 import pprint
 import logging
 import sys
 import os
-from argparse import ArgumentParser
 from lib import papercut
 import ldif
 
@@ -26,13 +24,7 @@ fh = logging.FileHandler(debugfile)
 fh.setLevel(logging.DEBUG)
 fh.setFormatter(formatter)
 logger.addHandler(fh)
-#ch = logging.StreamHandler()
-#logger.addHandler(ch)
 
-# option from commandline
-
-#cliParser=ArgumentParser( prog = 'run', description =""" Script used to sync PAPERCUT with LSC trough lsc plugin exec""")
-#cliParser.add_argument("user", default="fakeuser", help="username to use for get/updateOne/delete user from PAPERCUT server", type=str,nargs='?')
 
 def convertLdapRecord(ldapRecord):
   # clean LDAP phase
@@ -45,7 +37,6 @@ def convertLdapRecord(ldapRecord):
   data=[]
   for key, value in ldapRecord.items():
     val=[key,value[0].decode()]
-    #FIXME: faire la conversion de TAG
     data.append(val)
   return(data)
 
@@ -59,15 +50,15 @@ if __name__ == '__main__':
   pcCnx.papercutAttributs =os.environ.get("LSC_PC_ATTRIBUTS").split(",")
   pcCnx.connect()
 
- # arguments = cliParser.parse_args()
-  # If reading LDIF failed because it's malformed, it seems that implies a get Action
-  # It seems than an empty input didn't throw an error at LDIFRecord and parse() functions
+  if len(sys.argv) > 2 :
+    logger.debug("Too much arguments")
+    exit(255)
+
   try:
     user = sys.argv[1]
     try :
       inputData = ldif.LDIFRecordList(sys.stdin)
       inputData.parse()
-      # If reading an empty record , an index errors occurs
       ldapRecord = inputData.all_records[0][1]
       try :
         ldapAction = ldapRecord['changetype'][0].decode()
@@ -88,15 +79,11 @@ if __name__ == '__main__':
         logger.debug("Rename %s ", pcCnx.getIdFromDn(user))
         logger.debug("Not implemented yet")
       else:
-        logger.debug("Unknowk Ldif action detected")
+        logger.debug("Unknown Ldif action detected")
         exit(155)
-#    except IndexError as e:
-#      logger.debug("Error while parsing stdin %s",str(e))
-#      logger.debug("PC user list generation")
-#      pcCnx.listPapercutLscExec()
     except Exception as e:
-      logger.debug("Get information from %s", pcCnx.getIdFromDn(user))
+      logger.debug("Get PaperCut informations for %s", pcCnx.getIdFromDn(user))
       pcCnx.getPapercutLscExec(user)
   except IndexError as e:
-    logger.debug("PC user list generation")
+    logger.debug("Fetch all user from PaperCut")
     pcCnx.listPapercutLscExec()
