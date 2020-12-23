@@ -4,10 +4,11 @@ import pprint
 import logging
 import sys
 import os
-from lib import papercut
+#from lib import lscPapercut
 import ldif
-
-
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + './lib/')
+#from lib import papercut
+from lib import LscConnector
 
 
 # Logger creation
@@ -42,7 +43,8 @@ def convertLdapRecord(ldapRecord):
 
 
 if __name__ == '__main__':
-  pcCnx=papercut.PaperCut()
+  #pcCnx=papercut.PaperCut()
+  pcCnx=LscConnector.LscPaperCut()
   # Init Class witch value
   pcCnx.url               =os.environ.get("LSC_PC_URL")
   pcCnx.token             =os.environ.get("LSC_PC_TOKEN")
