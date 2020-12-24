@@ -16,6 +16,7 @@ You need to :
 https://www.papercut.com/support/resources/manuals/ng-mf/common/topics/tools-web-services.html
 
 ## how to install lsc-script-papercut
+
 ### install
 ```
 apt-get install python3 virtualenv python3-virtualenv
@@ -50,10 +51,13 @@ https://www.papercut.com/support/resources/manuals/ng-mf/common/topics/tools-web
 
 
 # HOW it runs ?
+
 ## example in DEBUG and DRY-RUN mode
 
+You need run with one thread `-t 1` options
+
 ```
-lsc -f . -s all -c all -n
+lsc -f . -s all -c all -n -t1
 
 INFO  - Starting sync for Users
 DEBUG - Update condition false. Should have modified object uid=blueelephant502,ou=people,dc=demo,dc=fusion
