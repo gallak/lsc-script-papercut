@@ -31,9 +31,11 @@ function transformId2PCId(cardTag,cardFormat,cardValidity){
           PCTag=prefixPapercut.DESFIRE + lowerTag;
           break;
       }
+      return PCTag.toLowerCase();
     }
+    return "BAD_TAG_LENGTH :" + cardTag.length
   }
-  return PCTag.toLowerCase();
+  return ""
 }
 
 
