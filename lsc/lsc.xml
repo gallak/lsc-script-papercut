@@ -62,6 +62,10 @@
               <value>/srv/lsc-script-papercut/</value>
             </entry>
             <entry>
+              <key>LSC_PC_LOG_LEVEL</key>
+              <value>/tmp/log-file-from-env.log</value>
+            </entry>
+            <entry>
               <key>LSC_PC_LOG_FILE</key>
               <value>/tmp/log-file-from-env.log</value>
             </entry>

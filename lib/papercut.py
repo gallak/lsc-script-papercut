@@ -30,9 +30,9 @@ class PaperCut:
   def connect(self):
     try:
       self.proxy = ServerProxy(self.url + self.path, verbose=False,context = create_default_context(Purpose.CLIENT_AUTH))
-      self.logger.debug("CONNECT: Connection to %s",str(self.url+self.path))
+      self.logger.info("CONNECT: Connection to %s",str(self.url+self.path))
     except all as error:
-      self.logger.debug("CONNECT: Unable to connect to %s : %s ",str(self.url+self.path),str(error))
+      self.logger.critical("CONNECT: Unable to connect to %s : %s ",str(self.url+self.path),str(error))
 
   # retourne user list
   def list_users(self):
@@ -46,10 +46,10 @@ class PaperCut:
         try:
             user_list = self.proxy.api.listUserAccounts(self.token, offset,limit)
         except Fault as error:
-            self.logger.debug("PC:listUserAccounts(): Return fault is %s",error.faultString)
+            self.logger.info("PC:listUserAccounts(): Return fault is %s",error.faultString)
             exit(1)
         except ProtocolError as error:
-            self.logger.debug("PC:listUserAccounts(): A protocol error occurred to URL: %s nHTTP/HTTPS headers: %s Error code: %s Error message: %s",error.url, error.headers, error.errcode, error.errmsg)
+            self.logger.critical("PC:listUserAccounts(): A protocol error occurred to URL: %s nHTTP/HTTPS headers: %s Error code: %s Error message: %s",error.url, error.headers, error.errcode, error.errmsg)
             exit(1)
         offset += limit # We need to next slice of users
         return_list += user_list
@@ -62,13 +62,13 @@ class PaperCut:
     try:
         properties = self.proxy.api.getUserProperties(self.token,user,attributs)
     except xmlrpc.client.Fault as error:
-        self.logger.debug("PC:getUserProperty():  Return fault is %s",error.faultString)
+        self.logger.warning("PC:getUserProperty():  Return fault is %s",error.faultString)
         exit(1)
     except xmlrpc.client.ProtocolError as error:
-        self.logger.debug("PC:getUserProperty(): A protocol error occurred to URL: %s nHTTP/HTTPS headers: %s Error code: %s Error message: %s",error.url, error.headers, error.errcode,error.errmsg)
+        self.logger.critical("PC:getUserProperty(): A protocol error occurred to URL: %s nHTTP/HTTPS headers: %s Error code: %s Error message: %s",error.url, error.headers, error.errcode,error.errmsg)
         exit(1)
     except Exception as x:
-        self.logger.debug("PC:getUserProperty(): Error : %s",str(x))
+        self.logger.critical("PC:getUserProperty(): Error : %s",str(x))
         exit(1)
 
     return properties

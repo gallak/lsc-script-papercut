@@ -23,7 +23,7 @@ class LscPaperCut(PaperCut):
     if rdn[0] == self.pivot:
       return(rdn[1])
     else:
-      logger.debug("No pivot values found ")
+      self.logger.critical("No pivot values found ")
     exit(255)
 
 
@@ -66,7 +66,7 @@ class LscPaperCut(PaperCut):
           self.logger.debug("%s: %s is %s",logPrefix,self.papercutAttributs[i], fetchedValues[i])
         i+=1
     except Exception as x:
-      self.logger.debug("%s: Exception : %s, %s shouldn't exist",logPrefix,str(x),username)
+      self.logger.warning("%s: Exception : %s, %s shouldn't exist",logPrefix,str(x),username)
     exit(0)
 
   # IN  :
@@ -80,11 +80,11 @@ class LscPaperCut(PaperCut):
   def addPapercutLscExec(self,dn):
     logPrefix="ADD"
     username = self.getIdFromDn(dn)
-    self.logger.debug("%s: Create new user %s",logPrefix,username)
+    self.logger.info("%s: Create new user %s",logPrefix,username)
     try:
       self.proxy.api.addNewUser(self.token, username)
     except Exception as x:
-      self.logger.debug("%s: Unable tu create account %s : %s",logPrefix,username,str(x))
+      self.logger.critical("%s: Unable tu create account %s : %s",logPrefix,username,str(x))
       exit(255)
 
 
@@ -102,10 +102,10 @@ class LscPaperCut(PaperCut):
     logPrefix = "UPDATE"
     username = self.getIdFromDn(dn)
     try:
-      self.logger.debug("%s: Update %s with %s",logPrefix,username,str(values))
+      self.logger.info("%s: Update %s with %s",logPrefix,username,str(values))
       self.proxy.api.setUserProperties(self.token, username, values)
     except Exception as x:
-      self.logger.debug("%s: Problem  : %s ",logPrefix,str(x))
+      self.logger.critical("%s: Problem  : %s ",logPrefix,str(x))
       exit(255)
 
 
@@ -121,7 +121,7 @@ class LscPaperCut(PaperCut):
     try:
       self.proxy.api.deleteExistingUser(self.token, username)
     except Exception as x:
-      self.logger.debug("%s: Problem  : %s ",logPrefix,str(x))
+      self.logger.critical("%s: Problem  : %s ",logPrefix,str(x))
       exit(255)
 
   # IN  :

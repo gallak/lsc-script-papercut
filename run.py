@@ -4,25 +4,32 @@ import pprint
 import logging
 import sys
 import os
-#from lib import lscPapercut
 import ldif
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + './lib/')
-#from lib import papercut
 from lib import LscConnector
 
 
 # Logger creation
-logger = logging.getLogger("pcLog")
-# format de log
+logger    = logging.getLogger("pcLog")
 formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-# niveau de log
-#loglevel=confParser["log"].get("loglevel")
-logger.setLevel(logging.DEBUG)
-# handler
-debugfile=os.environ.get("LSC_PC_LOG_FILE")
+
+if len(os.environ.get("LSC_PC_LOG_FILE")) > 0 :
+  debugfile = os.environ.get("LSC_PC_LOG_FILE")
+else:
+  debugfile = "/tmp/lsc-papercut.log"
 fh = logging.FileHandler(debugfile)
-#fh.setLevel(logging.confParser["log"].get("loglevel"))
-fh.setLevel(logging.DEBUG)
+
+if len(os.environ.get("LSC_PC_LOG_LEVEL")) > 0 :
+  loglevel = os.environ.get("LSC_PC_LOG_LEVEL")
+else:
+  loglevel = "INFO"
+
+numeric_log_level = getattr(logging, loglevel, None)
+if not isinstance(numeric_log_level, int):
+  pprint.pprint("Invalid log level: %s" % loglevel)
+  exit(255)
+fh.setLevel(numeric_log_level)
+
+
 fh.setFormatter(formatter)
 logger.addHandler(fh)
 
