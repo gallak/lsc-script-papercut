@@ -1,0 +1,136 @@
+<?xml version="1.0"?>
+<lsc xmlns="http://lsc-project.org/XSD/lsc-core-2.1.xsd" xmlns:fusiondirectory="http://lsc-project.org/XSD/lsc-fusiondirectory-plugin-1.0.xsd" xmlns:exec="http://lsc-project.org/XSD/lsc-executable-plugin-1.0.xsd">
+  <connections>
+    <ldapConnection>
+      <name>openldap</name>
+      <url>ldap://10.0.2.4:389/dc=demo,dc=fusion</url>
+      <username>cn=admin,dc=demo,dc=fusion</username>
+      <password>passldap</password>
+      <authentication>SIMPLE</authentication>
+    </ldapConnection>
+
+    <pluginConnection>
+      <name>executable</name>
+      <url>fake</url>
+      <username>fake</username>
+      <password>fake</password>
+    </pluginConnection>
+  </connections>
+  <tasks>
+    <task>
+      <name>Users</name>
+      <bean>org.lsc.beans.SimpleBean</bean>
+     <pluginSourceService implementationClass="org.lsc.plugins.connectors.executable.ExecutableLdifSourceService">
+        <name>user-src-service</name>
+        <connection reference="executable"/>
+        <exec:executableLdifSourceServiceSettings>
+          <name>user-src-service-exec</name>
+          <connection reference="executable"/>
+          <exec:listScript>/srv/lsc-script-papercut/list.sh</exec:listScript>
+          <exec:getScript>/srv/lsc-script-papercut/get.sh</exec:getScript>
+          <exec:variables>
+            <entry>
+              <key>LSC_PC_BIN_PATH</key>
+              <value>/srv/lsc-script-papercut/</value>
+            </entry>
+            <entry>
+              <key>LSC_PC_LOG_FILE</key>
+              <value>/tmp/log-file-from-env.log</value>
+            </entry>
+            <entry>
+              <key>LSC_PC_LOG_LEVEL</key>
+              <value>DEBUG</value>
+            </entry>
+            <entry>
+              <key>LSC_PC_URL</key>
+              <value>http://10.0.2.16:9191/</value>
+            </entry>
+            <entry>
+              <key>LSC_PC_TOKEN</key>
+              <value>TestAPIKey</value>
+            </entry>
+            <entry>
+              <key>LSC_PC_PIVOT</key>
+              <value>uid</value>
+            </entry>
+            <entry>
+              <key>LSC_PC_ATTRIBUTS</key>
+              <value>secondary-card-number</value>
+            </entry>
+          </exec:variables>
+        </exec:executableLdifSourceServiceSettings>
+      </pluginSourceService>
+
+
+      <ldapDestinationService>
+        <name>openldap-destination-service</name>
+        <connection reference="openldap" />
+        <baseDn>dc=demo,dc=fusion</baseDn>
+        <pivotAttributes>
+          <string>uid</string>
+        </pivotAttributes>
+        <fetchedAttributes>
+	  <string>supannCMSType</string>
+          <string>supannCMSAffectation</string>
+          <string>supannCMSIdEtiquette</string>
+          <string>supannCMSId;x-desfire-xlsb</string>
+          <string>supannCMSId;x-mifare-xlsb</string>
+        </fetchedAttributes>
+        <getAllFilter><![CDATA[(&(objectClass=inetOrgPerson)(uid=*)(supannListeRouge=TRUE))]]></getAllFilter>
+        <getOneFilter><![CDATA[(&(objectClass=inetOrgPerson)(uid={uid})(supannListeRouge=TRUE))]]></getOneFilter>
+      </ldapDestinationService>
+      <propertiesBasedSyncOptions>
+        <mainIdentifier>dstBean.getMainIdentifier()</mainIdentifier>
+        <defaultDelimiter>;</defaultDelimiter>
+        <defaultPolicy>FORCE</defaultPolicy>
+        <conditions>
+          <create>true</create>
+          <update>true</update>
+          <delete>true</delete>
+          <changeId>false</changeId>
+        </conditions>
+        <dataset>
+          <name>supannCMSAffectation</name>
+          <policy>FORCE</policy>
+          <forceValues>
+            <string>js:setSupannCMSAffectation(srcBean.getDatasetFirstValueById("secondary-card-number"))</string>
+          </forceValues>
+        </dataset>
+
+        <dataset>
+          <name>supannCMSIdEtiquette</name>
+          <policy>FORCE</policy>
+          <forceValues>
+            <string>js:setSupannCMSIdEtiquette(srcBean.getDatasetFirstValueById("secondary-card-number"))</string>
+          </forceValues>
+        </dataset>
+
+        <dataset>
+          <name>supannCMSId;x-desfire-xlsb</name>
+          <policy>FORCE</policy>
+          <forceValues>
+            <string>js:setSupannCMSId(srcBean.getDatasetFirstValueById("secondary-card-number"),"DESFIRE")</string>
+          </forceValues>
+        </dataset>
+
+        <dataset>
+          <name>supannCMSId;x-mifare-xlsb</name>
+          <policy>FORCE</policy>
+          <forceValues>
+            <string>js:setSupannCMSId(srcBean.getDatasetFirstValueById("secondary-card-number"),"MIFARE")</string>
+          </forceValues>
+        </dataset>
+        <dataset>
+          <name>supannCMSType</name>
+          <policy>FORCE</policy>
+          <forceValues>
+            <string>"personnel"</string>
+          </forceValues>
+        </dataset>
+      </propertiesBasedSyncOptions>
+      <scriptInclude>
+        <string>./lib/supannCMSId.js</string>
+      </scriptInclude>
+    </task>
+  </tasks>
+</lsc>
