@@ -1,3 +1,69 @@
+// DEST
+//supannCMSId;x-desfire-xlsb 	00000EtDVb0hAPeB
+//supannCMSIdEtiquette 	{DESFIRE:XLSB}00000EtDVb0hAPeB
+//supannCMSAffectation 	[type=personnel][format=DESFIRE:XLSB][id=00000EtDVb0hAPeB][valide=vrai]
+
+
+// ORIG
+// r007f0138000etdvb0hapeb
+// r007f0138000kcytk8hgzgy
+// r007f0120bkgupuum
+
+
+
+function extractTag(cardTag){
+  var prefixPapercut = {
+    "MIFARE"  : "r007f0120",
+    "DESFIRE" : "r007f0138"
+  };
+
+  prefix = cardTag.substring(0,9)
+
+  switch(prefix){
+    case prefixPapercut.MIFARE : 
+        tag = "MIFARE:00000000" + cardTag.slice(-2) +cardTag.slice(-4,-2)+ cardTag.slice(-6,-4) + cardTag.slice(-8,-6);
+      break;
+    case prefixPapercut.DESFIRE :
+        tag = "DESFIRE:000"+cardTag.substring(10,24);
+      break;
+  }
+
+return(tag);
+}
+
+
+
+//function extractType(cardTag){
+//        return(extractTag(cardTag).split(":")[0]);
+//}
+
+
+function setSupannCMSId(cardTag,type){
+	tagArray=extractTag(cardTag).split(":");
+        if (type == tagArray[0]){
+		return(tagArray[1]);
+	}else{
+		return;
+	}
+}
+
+function setSupannCMSIdEtiquette(cardTag){
+        tagArray=extractTag(cardTag).split(":");
+	return("{"+tagArray[0]+":XLSB}"+tagArray[1]);
+}
+
+
+function setSupannCMSAffectation(cardTag){
+        tagArray=extractTag(cardTag).split(":");
+        return("[type=personnel][format="+tagArray[0]+":XLSB][id="+tagArray[1]+"][valide=vrai]");
+}
+
+
+
+
+
+
+
 // Functyion use to tranforms some RFID Tag stored inside LDAP Supannized Tree
 // Antoine Gallavardin (antoine.gallavardin@free.fr
 
