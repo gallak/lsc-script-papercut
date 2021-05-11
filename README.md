@@ -23,6 +23,7 @@ apt-get install python3 virtualenv python3-virtualenv
 git clone https://github.com/gallak/lsc-script-papercut.git
 cd lsc-script-papercut
 virtualenv -p python3 .
+source ./bin/activate
 pip install -r requirements.txt
 ```
 
