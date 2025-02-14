@@ -50,8 +50,10 @@ https://www.papercut.com/support/resources/manuals/ng-mf/applicationserver/topic
 # how to active XML-RPC interface
 https://www.papercut.com/support/resources/manuals/ng-mf/common/topics/tools-web-services.html
 
+# More informatiosn about format card
+https://www.papercut.com/help/manuals/ng-mf/applicationserver/user-card-id-reader-faq/#my-card-reader-is-reading-numbers-in-a-format-different-to-my-records-how-can-i-change-the-format
 
-# HOW it runs ?
+### HOW it runs ?
 
 ## example in DEBUG and DRY-RUN mode
 
