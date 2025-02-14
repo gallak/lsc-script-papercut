@@ -1,7 +1,7 @@
 // DEST
 //supannCMSId;x-desfire-xlsb 	00000EtDVb0hAPeB
-//supannCMSIdEtiquette 	{DESFIRE:XLSB}00000EtDVb0hAPeB
-//supannCMSAffectation 	[type=personnel][format=DESFIRE:XLSB][id=00000EtDVb0hAPeB][valide=vrai]
+//supannCMSIdEtiquette 	{DESFIRE:XLSB}00000EtXVb0hAPeB
+//supannCMSAffectation 	[type=personnel][format=DESFIRE:XLSB][id=00000EtXVb0hAPeB][valide=vrai]
 
 
 function extractTag(cardTag){
