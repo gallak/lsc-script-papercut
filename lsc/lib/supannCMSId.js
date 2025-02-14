@@ -4,13 +4,6 @@
 //supannCMSAffectation 	[type=personnel][format=DESFIRE:XLSB][id=00000EtDVb0hAPeB][valide=vrai]
 
 
-// ORIG
-// r007f0138000etdvb0hapeb
-// r007f0138000kcytk8hgzgy
-// r007f0120bkgupuum
-
-
-
 function extractTag(cardTag){
   var prefixPapercut = {
     "MIFARE"  : "r007f0120",
@@ -65,7 +58,7 @@ function setSupannCMSAffectation(cardTag){
 
 
 // Functyion use to tranforms some RFID Tag stored inside LDAP Supannized Tree
-// Antoine Gallavardin (antoine.gallavardin@free.fr
+// Antoine Gallavardin (antoine.gallavardin@free.fr)
 
 function transformId2PCId(cardTag,cardFormat,cardValidity){
   // prefix table is empirique keys should correspond to label inside LDAP tree : label of SupannCMSFormats
